@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tattoo Price Calculator</title>
+<style>
+body{font:16px -apple-system,BlinkMacSystemFont,sans-serif;background:#fffaf5;color:#29231f;max-width:650px;margin:auto;padding:20px}
+h1{font-size:28px}section{background:white;border:1px solid #e8ddd4;border-radius:16px;padding:18px;margin:14px 0}
+label{display:block;margin:14px 0 6px;font-weight:600}
+select,input,textarea{box-sizing:border-box;width:100%;padding:12px;border:1px solid #d8c9bf;border-radius:9px;background:white;font:inherit}
+.price{background:#f4ebe4;border-radius:12px;padding:18px;margin-top:20px}
+#price{font-size:38px;font-weight:bold;margin:8px 0}
+button{padding:12px 16px;border:0;border-radius:9px;background:#8b594d;color:white;font-size:16px;margin:8px 5px 0 0}
+small{color:#746b65;line-height:1.5}
+</style>
+</head>
+<body>
+<h1>Tattoo Price Calculator</h1>
+<p>Studio price estimate · EUR (€)</p>
+<section>
+<label for="type">Type of tattoo</label>
+<select id="type">
+<option value="60">Small symbol / simple design — €60</option>
+<option value="70">Detailed small design — €70</option>
+<option value="80">Silhouette / filled motif — €80</option>
+<option value="80">Short lettering — €80</option>
+<option value="160">Long lettering — €160</option>
+<option value="180">Multi-line lettering — €180</option>
+</select>
+<label for="size">Size</label>
+<select id="size">
+<option value="0">Tiny · 1–3 cm (+€0)</option>
+<option value="0" selected>Small · 3–5 cm (+€0)</option>
+<option value="20">Medium · 5–10 cm (+€20)</option>
+<option value="50">Large · 10–15 cm (+€50)</option>
+<option value="90">Extra large · 15+ cm (+€90)</option>
+</select>
+<label for="complexity">Design complexity</label>
+<select id="complexity">
+<option value="0">Simple (+€0)</option>
+<option value="15">Moderate (+€15)</option>
+<option value="30">Detailed (+€30)</option>
+</select>
+<label for="fill">Black fill</label>
+<select id="fill">
+<option value="0">No fill (+€0)</option>
+<option value="10">Some black fill (+€10)</option>
+<option value="20">Heavy / extensive black fill (+€20)</option>
+</select>
+<label for="placement">Placement</label>
+<select id="placement">
+<option value="0">Standard placement (+€0)</option>
+<option value="15">Difficult placement (+€15)</option>
+</select>
+<label for="minutes">Estimated working time (minutes)</label>
+<input id="minutes" type="number" min="0" placeholder="e.g. 60">
+<div class="price">
+<small>SUGGESTED PRICE</small>
+<div id="price">€60</div>
+<small id="breakdown"></small>
+<label for="custom">Custom price (€), optional</label>
+<input id="custom" type="number" min="0" placeholder="Use suggested price">
+<label for="notes">Design notes</label>
+<textarea id="notes" rows="3" placeholder="Dimensions, details, etc."></textarea>
+<button onclick="copyEstimate()">Copy price estimate</button>
+<button onclick="resetForm()">Reset</button>
+</div>
+</section>
+<small>Starting prices are based on provided examples. Adjust the final price to fit each design.</small>
+<script>
+const ids=["type","size","complexity","fill","placement"];
+function calculate(){
+ let vals=ids.map(id=>Number(document.getElementById(id).value));
+ let total=Math.round(vals.reduce((a,b)=>a+b,0)/5)*5;
+ let c=document.getElementById("custom").value;
+ let final=c.trim()!==""&&Number(c)>=0?Number(c):total;
+ document.getElementById("price").textContent="€"+final;
+ document.getElementById("breakdown").textContent=
+ "Base €"+vals[0]+" · Size +€"+vals[1]+" · Complexity +€"+vals[2]+" · Fill +€"+vals[3]+" · Placement +€"+vals[4];
+ return {total,final,vals};
+}
+ids.forEach(id=>document.getElementById(id).addEventListener("change",calculate));
+document.getElementById("custom").addEventListener("input",calculate);
+async function copyEstimate(){
+ let x=calculate();
+ let t="TATTOO PRICE ESTIMATE\nSuggested: €"+x.total+"\nFinal price: €"+x.final+
+ "\nWorking time: "+(document.getElementById("minutes").value||"Not specified")+" minutes"+
+ "\nNotes: "+(document.getElementById("notes").value||"None");
+ try{await navigator.clipboard.writeText(t);alert("Price estimate copied!")}
+ catch(e){prompt("Copy your estimate:",t)}
+}
+function resetForm(){
+ document.getElementById("type").selectedIndex=0;
+ ["size","complexity","fill","placement"].forEach(id=>document.getElementById(id).selectedIndex=0);
+ ["minutes","custom","notes"].forEach(id=>document.getElementById(id).value="");
+ calculate();
+}
+calculate();
+</script>
+</body>
+</html>
